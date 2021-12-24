@@ -18,5 +18,11 @@ inline double randomDouble() {
 	return distribution(generator);
 }
 
+inline double randomDouble(double min, double max) {
+	static std::mt19937 generator;
+	static std::uniform_real_distribution<double> distribution(min, max);
+	return distribution(generator);
+}
+
 #include "ray.h"
 #include "vec3.h"

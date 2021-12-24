@@ -8,12 +8,17 @@
 #include "sphere.h"
 #include "camera.h"
 
-Color3 rayColor(const Ray &ray, const Hittable &world) {
+Color3 rayColor(const Ray &ray, const Hittable &world, int depth) {
 	HitRecord record;
 
+	if (depth <= 0) {
+		return Color3(0, 0, 0);
+	}
 	// Hittable or HittableList hit()
-	if (world.hit(ray, 0, infinity, record)) {
-		return 0.5 * (record.normal + Color3(1, 1, 1));
+	if (world.hit(ray, 0.001, infinity, record)) {
+		// Chose random point inside the unit sphere that is centered around the unti normal from the hit point
+		Point3 target = record.point + record.normal + randomPointOnUnitSphere();
+		return 0.5 * rayColor(Ray(record.point, target - record.point), world, depth-1);
 	}
 	
 	Vec3 unitDirection = unitVector(ray.getDirection());
@@ -31,7 +36,8 @@ int main()
 	const double imageAspectRatio = 16.0 / 9.0;
 	const int imageWidth = 400;
 	const int imageHeight = static_cast<int>(imageWidth / imageAspectRatio);
-	const int samplesPerPixel = 1000;
+	const int samplesPerPixel = 100;
+	const int maxDepth = 50;
 
 	// World
 	HittableList world;
@@ -63,7 +69,7 @@ int main()
 				double rayX = (x + randomDouble()) / (imageWidth - 1);
 				double rayY = (y + randomDouble()) / (imageHeight - 1);
 				Ray ray = camera.getRay(rayX, rayY);
-				pixelColor += rayColor(ray, world);
+				pixelColor += rayColor(ray, world, maxDepth);
 			}
 			writeColor(outputFile, pixelColor, samplesPerPixel);
 		}

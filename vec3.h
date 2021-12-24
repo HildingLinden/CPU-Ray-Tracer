@@ -38,6 +38,14 @@ public:
 		return elems[0] * elems[0] + elems[1] * elems[1] + elems[2] * elems[2];
 	}
 
+	static Vec3 random() {
+		return Vec3(randomDouble(), randomDouble(), randomDouble());
+	}
+
+	static Vec3 random(double min, double max) {
+		return Vec3(randomDouble(min, max), randomDouble(min, max), randomDouble(min, max));
+	}
+
 	// Members
 	double elems[3];
 };
@@ -111,4 +119,18 @@ Vec3 cross(const Vec3 &u, const Vec3 &v) {
 
 Vec3 unitVector(Vec3 vector) {
 	return vector / vector.length();
+}
+
+Vec3 randomPointInUnitSphere() {
+	// Keep picking points in the unit cube until one is found inside the unit sphere
+	while (true) {
+		Vec3 point = Vec3::random(-1, 1);
+		if (point.lengthSquared() < 1) {
+			return point;
+		}
+	}
+}
+
+Vec3 randomPointOnUnitSphere() {
+	return unitVector(randomPointInUnitSphere());
 }
