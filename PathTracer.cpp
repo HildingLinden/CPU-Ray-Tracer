@@ -7,6 +7,7 @@
 #include "hittableList.h"
 #include "sphere.h"
 #include "camera.h"
+#include "material.h"
 
 Color3 rayColor(const Ray &ray, const Hittable &world, int depth) {
 	HitRecord record;
@@ -16,9 +17,12 @@ Color3 rayColor(const Ray &ray, const Hittable &world, int depth) {
 	}
 	// Hittable or HittableList hit()
 	if (world.hit(ray, 0.001, infinity, record)) {
-		// Chose random point inside the unit sphere that is centered around the unti normal from the hit point
-		Point3 target = record.point + record.normal + randomPointOnUnitSphere();
-		return 0.5 * rayColor(Ray(record.point, target - record.point), world, depth-1);
+		Ray scatteredRay;
+		Color3 attenuation;
+		if (record.materialPtr->scatter(ray, record, attenuation, scatteredRay)) {
+			return attenuation * rayColor(scatteredRay, world, depth - 1);
+		}
+		return Color3(0, 0, 0);
 	}
 	
 	Vec3 unitDirection = unitVector(ray.getDirection());
@@ -36,13 +40,22 @@ int main()
 	const double imageAspectRatio = 16.0 / 9.0;
 	const int imageWidth = 400;
 	const int imageHeight = static_cast<int>(imageWidth / imageAspectRatio);
-	const int samplesPerPixel = 100;
+	const int samplesPerPixel = 500;
 	const int maxDepth = 50;
 
 	// World
 	HittableList world;
-	world.add(std::make_shared<Sphere>(Point3(0, 0, -1), 0.5));
-	world.add(std::make_shared<Sphere>(Point3(0,-100.5,-1), 100));
+	auto material_ground = std::make_shared<Lambertian>(Color3(0.2, 0.8, 0.0));
+	auto material_center = std::make_shared<Lambertian>(Color3(0.3, 0.4, 0.8));
+	auto material_left = std::make_shared<Dielectric>(1.5);
+	auto material_right = std::make_shared<Metal>(Color3(0.8, 0.8, 0.8), 0.3);
+
+	world.add(std::make_shared<Sphere>(Point3(0.0, -100.5, -1.0), 100.0, material_ground));
+	world.add(std::make_shared<Sphere>(Point3(0.0, 0.0, -1.0), 0.5, material_center));
+	world.add(std::make_shared<Sphere>(Point3(-1.0, 0.0, -1.0), 0.5, material_left));
+	world.add(std::make_shared<Sphere>(Point3(-1.0, 0.0, -1.0), -0.4, material_left));
+	world.add(std::make_shared<Sphere>(Point3(1.0, 0.0, -1.0), 0.5, material_right));
+
 
 	Camera camera;
 

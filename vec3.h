@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 class Vec3 {
 public:
 	// Constructors
@@ -44,6 +46,11 @@ public:
 
 	static Vec3 random(double min, double max) {
 		return Vec3(randomDouble(min, max), randomDouble(min, max), randomDouble(min, max));
+	}
+
+	bool nearZero() const {
+		const double epsilon = 1e-8;
+		return (std::fabs(elems[0]) < epsilon) && (std::fabs(elems[1]) < epsilon) && (std::fabs(elems[2]) < epsilon);
 	}
 
 	// Members
@@ -133,4 +140,15 @@ Vec3 randomPointInUnitSphere() {
 
 Vec3 randomPointOnUnitSphere() {
 	return unitVector(randomPointInUnitSphere());
+}
+
+Vec3 reflect(const Vec3 &v, const Vec3 &n) {
+	return v - 2 * dot(v, n) * n;
+}
+
+Vec3 refract(const Vec3 &uv, const Vec3 &n, double etaOverEtaPrime) {
+	double cosTheta = std::fmin(dot(-uv, n), 1.0);
+	Vec3 rayOutPerpendicular = etaOverEtaPrime * (uv + cosTheta * n);
+	Vec3 rayOutParallel = -std::sqrt(std::fabs(1.0 - rayOutPerpendicular.lengthSquared())) * n;
+	return rayOutParallel + rayOutPerpendicular;
 }
