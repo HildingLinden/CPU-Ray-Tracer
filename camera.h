@@ -4,12 +4,12 @@
 
 class Camera {
 public:
-	Camera() {
-		const double imageAspectRatio = 16.0 / 9.0; //TODO: Double aspect ratio declaration?
-
-		// Viewport
-		const double viewportHeight = 2.0;
-		const double viewportWidth = imageAspectRatio * viewportHeight;
+	Camera(double verticalFOV, double aspectRatio) {
+		double theta = degresToRadians(verticalFOV);
+		double h = std::tan(theta / 2.0);
+		const double viewportHeight = 2.0 * h;
+		const double viewportWidth = aspectRatio * viewportHeight;
+		
 		const double focalLength = 1.0;
 
 		// Member initialization

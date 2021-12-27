@@ -38,9 +38,9 @@ int main()
 {
 	// Image
 	const double imageAspectRatio = 16.0 / 9.0;
-	const int imageWidth = 400;
+	const int imageWidth = 3840;
 	const int imageHeight = static_cast<int>(imageWidth / imageAspectRatio);
-	const int samplesPerPixel = 500;
+	const int samplesPerPixel = 100;
 	const int maxDepth = 50;
 
 	// World
@@ -57,7 +57,7 @@ int main()
 	world.add(std::make_shared<Sphere>(Point3(1.0, 0.0, -1.0), 0.5, material_right));
 
 
-	Camera camera;
+	Camera camera(80, imageAspectRatio);
 
 	// Output setup
 	const std::string ppmMagicNumber = "P3";
@@ -73,7 +73,7 @@ int main()
 
 	// Render PPM pixel data
 	for (int y = imageHeight - 1; y >= 0; y--) {
-		std::cout << "\rRows of pixels remaining: " << y << " " << std::flush;
+		std::cout << "\rRows of pixels remaining: " << y << " of " << imageHeight << std::flush;
 		for (int x = 0; x < imageWidth; x++) {;
 			
 			Color3 pixelColor(0, 0, 0);
