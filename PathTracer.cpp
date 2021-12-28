@@ -1,6 +1,7 @@
 ﻿#include <string>
 #include <iostream>
 #include <fstream>
+#include <chrono>
 
 #include "rtUtil.h"
 #include "color.h"
@@ -30,7 +31,7 @@ Color3 rayColor(const Ray &ray, const Hittable &world, int depth) {
 	// Get Y normalized between 0 and 1
 	double t = 0.5 * (unitDirection[1] + 1.0);
 
-	// Linear interpolation between white and blue
+	// Linear interpolation between white and bluel
 	return (1.0 - t) * Color3(1.0, 1.0, 1.0) + t * Color3(0.5, 0.7, 1.0);
 }
 
@@ -38,7 +39,7 @@ int main()
 {
 	// Image
 	const double imageAspectRatio = 16.0 / 9.0;
-	const int imageWidth = 3840;
+	const int imageWidth = 960;
 	const int imageHeight = static_cast<int>(imageWidth / imageAspectRatio);
 	const int samplesPerPixel = 100;
 	const int maxDepth = 50;
@@ -57,7 +58,7 @@ int main()
 	world.add(std::make_shared<Sphere>(Point3(1.0, 0.0, -1.0), 0.5, material_right));
 
 
-	Camera camera(80, imageAspectRatio);
+	Camera camera(Point3(0,0,2), Point3(0,0,-1), Point3(0,1,0), 90, imageAspectRatio);
 
 	// Output setup
 	const std::string ppmMagicNumber = "P3";
@@ -72,8 +73,10 @@ int main()
 	outputFile << ppmMagicNumber << "\n" << imageWidth << " " << imageHeight << "\n" << maxColor << "\n";
 
 	// Render PPM pixel data
+	std::cout << "Rendering " << imageHeight << " rows\n";
+	std::chrono::steady_clock::time_point start = std::chrono::high_resolution_clock::now();
+
 	for (int y = imageHeight - 1; y >= 0; y--) {
-		std::cout << "\rRows of pixels remaining: " << y << " of " << imageHeight << std::flush;
 		for (int x = 0; x < imageWidth; x++) {;
 			
 			Color3 pixelColor(0, 0, 0);
@@ -86,9 +89,15 @@ int main()
 			}
 			writeColor(outputFile, pixelColor, samplesPerPixel);
 		}
+
+		
+		std::cout << "\rRows of pixels remaining: " << y << "   " << std::flush;
+
 	}
 
-	std::cout << "\nDone!" << std::endl;
+	std::chrono::steady_clock::time_point end = std::chrono::high_resolution_clock::now();
+
+	std::cout << "\nDone in " << std::chrono::duration<double>(end - start).count() << "s\n";
 
 	outputFile.close();
 }
